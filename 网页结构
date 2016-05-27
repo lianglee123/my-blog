@@ -1,0 +1,40 @@
+main:
+	• ('/', index(), 'indext.html')
+
+
+	• ('/user/<username>', user(username), 'user.html')
+
+	• ('/post/<int: id>', post(id), 'post.html')
+
+
+
+	• ('/edit-profile', edit_profile(), 'edit_profile.html')
+
+	用户资料编辑
+	• ('/edit-profile/<int: user_id>', edit_profile_admin(id),  'main.user' or 'edit_profile.html')
+
+	编辑文章
+	• ('/editpost/<int: post_id>',  edit(id), 'main.post' or 'edit_post.html')
+
+
+
+• auth:
+	• ('/register', register(),  'auth.login' or 'auth/register.html'）
+	• ('/login',   login(),  'next' or 'main.index' or 'auth/login.html'
+	• ('/logout', logout(), 'main.index')
+
+
+	• ('/confirm',  resend_confirmation(),  'main.index')
+	• ('/confirm/<token>',  confirm(), 'main.index')
+	• ('/unconfirmed'， unconfirmed(),    'main.index' or 'auth/unconfirmed.html')
+
+
+	• ('/change-password',   change_password(),  'auth/change_passwoed.html' or 'main.index'
+
+
+	• ('/reset',   password_reset_request()， 'auth/reset_password.html' or 'auth.login')
+	• ('/reset/<token>', password_reset(), 'auth/reset_password.html' or 'auth.login' or 'main.index'
+
+
+	• ('/change-email', change_email_request(), 'auth/change_email.html' or 'main.index')
+	• ('/change-email/<token>', change_email(), 'main.index')
