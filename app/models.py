@@ -1,9 +1,13 @@
 from . import db
+from flask import current_app
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask.ext.login import UserMixin
+from .import login_manager
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
@@ -47,16 +51,32 @@ class User(db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    def generate_confirmation_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'confirm': self.id})
+
+    def confirm(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.load(token)
+        except:
+            return False
+        if data.get('confirm') != self.id:
+            return False
+        self.confirmed = True
+        db.session.add(self)
+        return True
+
 
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64), index=True, nullable=False, default="默认标题")
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     body = db.Column(db.Text, nullable=False)
     body_html = db.Column(db.Text)
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
-
 
     @staticmethod
     def generate_fake(count=100):
@@ -72,6 +92,18 @@ class Post(db.Model):
                      body=forgery_py.lorem_ipsum.sentences(randint(50, 150)),
                      )
             db.session.add(p)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+
+    @staticmethod
+    def add_title(default_title):
+        from sqlalchemy.exc import IntegrityError
+        for post in Post.query.all():
+            if post.title is None:
+                post.title = default_title
+            db.session.add(post)
             try:
                 db.session.commit()
             except IntegrityError:
@@ -135,3 +167,8 @@ class Link(db.Model):
                     db.session.commit()
                 except IntegrityError:
                     db.session.rollback()
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))

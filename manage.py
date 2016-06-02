@@ -1,5 +1,6 @@
 import os
 from app import create_app, db
+from flask import jsonify
 from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 from app.models import User, Post, Comment, Link
