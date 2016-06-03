@@ -34,10 +34,25 @@ class RegisterForm(Form):
             raise ValidationError('Username already in use.')
 
 
-
 class ChangePassword(Form):
     old_password = StringField('原密码', validators=[DataRequired(), Length(1, 64)])
     new_password = StringField('新密码', validators=[
         DataRequired(), EqualTo('new_password2', message='Password must match')])
     new_password2 = StringField('密码确认', validators=[DataRequired()])
+    submit = SubmitField('确认')
+
+
+class ResetConfimForm(Form):
+    email = StringField('邮箱', validators=[DataRequired(), Length(1, 64), Email()])
+    password1 = StringField('密码', validators=[DataRequired(), Length(1, 64)])
+    password2 = StringField('密码确认', validators=[DataRequired(), Length(1, 24)])
+    submit = SubmitField('重置密码')
+
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first() is None:
+            raise ValidationError('Unknown email address.')
+
+
+class ResetRequestForm(Form):
+    email = StringField('输入你的邮箱', validators=[DataRequired(), Length(1, 64), Email()])
     submit = SubmitField('确认')

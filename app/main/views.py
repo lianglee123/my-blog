@@ -8,7 +8,7 @@ from .. import db
 from flask.ext.login import login_required
 
 
-#主索引页
+# 主索引页
 @main.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
@@ -16,7 +16,7 @@ def index():
         page, per_page=20, error_out=False)
     posts = pagination.items
     print(type(posts))
-    return jsonify({'post': str(posts), 'pagination': str(pagination)})
+    return jsonify({'template': 'index.html', 'post': str(posts), 'pagination': str(pagination)})
 
 
 # 个人索引页
@@ -55,7 +55,7 @@ def edit_profile():
 
 # 作者编辑自己的文章
 @main.route('/edit-post/<int:post_id>')
-# @login_required
+@login_required
 def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
     # if current_user != post.author:
@@ -69,5 +69,3 @@ def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
     form.pagedown.data = post.body
     return render_template('main/pagedown_test.html', form=form)
-
-
