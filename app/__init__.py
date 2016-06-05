@@ -7,6 +7,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.login import LoginManager
 from flask.ext.pagedown import PageDown
 from flask.ext.mail import Mail
+from flask.ext.moment import Moment
 
 from config import config
 
@@ -17,6 +18,8 @@ login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
 pagedown = PageDown()
+moment = Moment()
+
 mail = Mail()
 
 
@@ -29,6 +32,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     login_manager.init_app(app)
     pagedown.init_app(app)
+    moment.init_app(app)
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

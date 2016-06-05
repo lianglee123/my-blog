@@ -2,17 +2,21 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "_macros.html" as macros %}
 
-{% block title %}Flasky{% endblock %}
+{% block title %}Liang{% endblock %}
+
 
 {% block page_content %}
 <div class="post-tabs">
+    {% set thumbnail = True %}
     {% include '_posts.html' %}
 </div>
+
 {% if pagination %}
 <div class="pagination">
     {{ macros.pagination_widget(pagination, '.index') }}
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block scripts %}

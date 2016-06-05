@@ -1,0 +1,24 @@
+<ul class="comments">
+    {% for comment in comments %}
+    <li class="comment">
+        <div class="comment-thumbnail">
+            <a href="#">
+                <img class="img-rounded profile-thumbnail" src="{{ url_for('static', filename=anonymous) }}"
+                width="40", height="40">
+            </a>
+        </div>
+        <div class="comment-content">
+            <div class="comment-date">{{ moment(comment.create_time).fromNow() }}</div>
+            <div class="comment-author">{{ comment.author_email }}</div>
+            <div class="comment-body">
+                {{ comment.body }}
+            </div>
+                <br>
+            {% if current_user.id == comment.post.author_id %}
+                <a class="btn btn-default btn-xs"
+                   href="{{ url_for('.dele_comment', id=comment.id) }}?pre_url={{ url_for('main.post', post_id=comment.post_id) }}">删除此评论</a>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}Liang - Write Post{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>写文章</h1>
+</div>
+<div>
+{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}

@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from .import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from markdown import markdown
+import bleach
 
 
 class User(UserMixin, db.Model):
@@ -125,6 +127,17 @@ class Post(db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+                        'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+                        'h1', 'h2', 'h3', 'p']
+        target.body_html = bleach.linkify(bleach.clean(
+            markdown(value, output_format='html'),
+            tags=allowed_tags, strip=True))
+
+db.event.listen(Post.body, 'set', Post.on_changed_body)
+
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -133,7 +146,6 @@ class Comment(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
     author_email = db.Column(db.String(64), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    body_html = db.Column(db.Text)
 
     @staticmethod
     def generate_fake(count=100):

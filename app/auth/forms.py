@@ -10,20 +10,20 @@ class LoginForm(Form):
                                              Email()])
     password = PasswordField('密码', validators=[DataRequired()])
     remember_me = BooleanField('记住我')
-    submit = SubmitField('Log In')
+    submit = SubmitField('登录')
 
 
 class RegisterForm(Form):
     email = StringField('邮箱', validators=[DataRequired(), Length(1, 64),
                                             Email()])
-    username = SubmitField('用户名', validators=[
-        DataRequired(), Length(), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
+    username = StringField('用户名', validators=[
+        DataRequired(), Length(1, 64), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
                                          'Username must have only letters,'
                                          'number, dots or underscores.')])
-    password = PasswordField('Password', validators=[
+    password = PasswordField('密码', validators=[
         DataRequired(), EqualTo('password2', message='Password must match')])
-    password2 = PasswordField('Confirm password', validators=[DataRequired()])
-    submit = SubmitField('Register')
+    password2 = PasswordField('密码确认', validators=[DataRequired()])
+    submit = SubmitField('注册')
 
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
@@ -42,7 +42,7 @@ class ChangePassword(Form):
     submit = SubmitField('确认')
 
 
-class ResetConfimForm(Form):
+class ResetConfirmForm(Form):
     email = StringField('邮箱', validators=[DataRequired(), Length(1, 64), Email()])
     password1 = StringField('密码', validators=[DataRequired(), Length(1, 64)])
     password2 = StringField('密码确认', validators=[DataRequired(), Length(1, 24)])
