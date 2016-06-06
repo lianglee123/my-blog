@@ -123,4 +123,6 @@ def dele_comment(id):
 @main.route('/test')
 def test():
     print(request.args)
-    return render_template('test.html')
+    result = render_template('test.html')
+    print(type(result))
+    return result
