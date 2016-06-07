@@ -1,5 +1,5 @@
 from . import db
-from flask import current_app
+from flask import current_app, url_for
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
@@ -7,6 +7,7 @@ from .import login_manager
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from markdown import markdown
 import bleach
+from .exceptions import ValidationError
 
 
 class User(UserMixin, db.Model):
@@ -21,6 +22,16 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime, default=datetime.utcnow)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     links = db.relationship('Link', backref='user', lazy='dynamic')
+
+    def to_json(self):
+        json_user = {
+            'email': self.email,
+            'name': self.username,
+            'about_me': self.about_me,
+            'last_login': self.last_login,
+            'posts': url_for('api.get_user_posts', id=self.id, _external=True)
+        }
+        return json_user
 
     @property
     def password(self):
@@ -96,6 +107,27 @@ class Post(db.Model):
     body_html = db.Column(db.Text)
     comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
+    def to_json(self):
+        json_post = {
+            'url': url_for('api.get_post', id=self.id),
+            'title': self.title,
+            'author': url_for('api.get_user', id=self.author_id),
+            'body': self.body,
+            'comments': url_for('api.get_post_comments', id=self.id),
+            'comments_count': self.comments.count()
+        }
+        return json_post
+
+    @staticmethod
+    def from_json(json_post):
+        body = json_post.get('body')
+        title = json_post.get('title')
+        if body is None or body == '':
+            raise ValidationError('post does not have a body')
+        if title is None or title == '':
+            raise ValidationError('post does not have a title')
+        return Post(body=body, title=title)
+
     @staticmethod
     def generate_fake(count=100):
         from random import seed, randint
@@ -146,6 +178,25 @@ class Comment(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.utcnow)
     author_email = db.Column(db.String(64), nullable=False)
     body = db.Column(db.Text, nullable=False)
+
+    def to_json(self):
+        json_comment = {
+            'url': url_for('api.get_comment', id=self.id),
+            'post': url_for('api.get_post', id=self.post_id),
+            'author_email': self.email,
+            'body': self.body,
+        }
+        return json_comment
+
+    @staticmethod
+    def from_json(json_comment):
+        email = json_comment.get('author_email')
+        body = json_comment.get('body')
+        if not email:
+            raise ValidationError('comment does not has a body.')
+        if not body:
+            raise ValidationError('does have author email.')
+        return Comment(body=body, author_email=email)
 
     @staticmethod
     def generate_fake(count=100):

@@ -1,5 +1,6 @@
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 from . import api
+from ..exceptions import ValidationError
 
 
 @api.errorhandler(404)
@@ -9,11 +10,13 @@ def page_not_found(e):
         return response
 
 
-@api.errorhandler(500)
+@api.app_errorhandler(500)
 def internal_server_error(e):
-    response = jsonify({'error': 'internal server error'})
-    response.status_code = 500
-    return response
+    if request.accept_mimetypes.accept_json and \
+            not request.accept_mimetypes.accept_html:
+        response = jsonify({'error': 'internal server error'})
+        response.status_code = 500
+    return render_template('500.html'), 500
 
 
 def bad_request(message):
@@ -32,3 +35,8 @@ def forbidden(message):
     response = jsonify({'error': 'forbidden', 'message': message})
     response.status_code = 403
     return response
+
+
+@api.errorhandler(ValidationError)
+def validation_error(e):
+    return bad_request(e.args[0])
