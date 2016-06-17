@@ -120,9 +120,8 @@ def dele_comment(id):
     pre_url = request.args.get('pre_url')
     return redirect(pre_url)
 
+
 @main.route('/test')
+@login_required
 def test():
-    print(request.args)
-    result = render_template('test.html')
-    print(type(result))
-    return result
+    return 'hello world'
